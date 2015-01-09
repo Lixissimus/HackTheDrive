@@ -1,2 +1,2 @@
 # HackTheDrive
-Repo for the Hach the Drive hackathon
+Repo for the Hack the Drive hackathon
