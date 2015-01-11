@@ -1,0 +1,20 @@
+{
+  "name": "bmwplaynow",
+  "version": "0.0.1",
+  "description": "The BMW PlayNow app for the HackTheDrive hackathon",
+  "scripts": {
+    "start": "http-server ./bmwcontroller/www -p $PORT",
+    "postinstall": "cd bmwcontroller/www/; bower install"
+  },
+  "dependencies": {
+    "bower": "1.3.12",
+    "http-server": "0.7.4"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.heroku.com/bmwplaynow.git"
+  }
+}
