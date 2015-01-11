@@ -116,6 +116,7 @@ function startSocketServer() {
 // --- Highscore handline ---
 
 function requestHighscore(chargepointName, callback) {
+	console.log('highscore requested for %s', chargepointName);
 	chargepointsCollection.findOne({name: chargepointName}, function(err, chargepoint) {
 		if (!chargepoint) {
 			callback([]);
@@ -206,7 +207,6 @@ function registerUser(username, chargepoint) {
 			registerChargepoint(chargepoint, function() {
 				registerUser(username, chargepoint);
 			});
-			registerUser(username, chargepoint);
 			return;
 		}
 	});
