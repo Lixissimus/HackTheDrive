@@ -25,6 +25,9 @@ var chargepoints = [];
 // 	highscore: array of { username: ..., score:... }
 // }
 
+// create some dummy data
+initHighscoreData();
+
 wss.on('connection', function(ws) {	
 	ws.on('close', function() {
 		console.log('Socket closed');
@@ -87,7 +90,7 @@ function requestHighscore(chargepointName) {
 
 	if (!chargepoint) return [];
 
-	return chargepoint.highscore;
+	return chargepoint.highscore.slice(0, 5);
 }
 
 function postScore(username, score) {
@@ -126,6 +129,8 @@ function registerChargepoint(chargepointName) {
 	chargepoints.push(newChargepoint);
 
 	console.log('Registered new chargepoint %s', chargepointName);
+
+	return newChargepoint;
 }
 
 function getChargepointByName(chargepointName) {
@@ -168,4 +173,18 @@ function registerUser(username, chargepoint) {
 	users.push(newUser);
 
 	console.log('Registered %s at chargepoint %s', username, chargepoint);
+}
+
+
+// --- create dummy data ---
+
+function initHighscoreData() {
+	var chargepoint = registerChargepoint('0000:017A');
+	chargepoint.highscore = [{
+		username: 'Morton',
+		score: 9005
+	}, {
+		username: 'Bowser',
+		score: 7365
+	}];
 }
