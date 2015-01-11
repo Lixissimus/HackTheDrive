@@ -1,5 +1,5 @@
 (function() {
-  var App, BMWClient, buildMap, config, bmwClient;
+  var BMWClient, config, bmwClient;
 
   BMWClient = this.BMWClient;
 
@@ -14,32 +14,13 @@
 
   bmwClient = new BMWClient(config);
 
-  App = bmwClient.model('App');
-
   $(function() {
     bmwClient.token(function(error, result) {
       if (error) {
         console.log("redirecting to login.");
         return bmwClient.authorize(config.redirect_uri);
       } else {
-        bmwClient.get(bmwClient.model("User"), {
-          id: result.UserId
-        }, function(error, result) {
-          var message;
-          message = 'Successfully authenticated ';
-          if (result.FirstName) {
-            message += result.FirstName;
-          } else if (result.UserName) {
-            message += result.UserName;
-          } else if (result.LastName) {
-            message += result.LastName;
-          } else if (result.Email) {
-            message += result.Email;
-          } else {
-            message += "Unknown";
-          }
-          onAuthenticated(bmwClient);
-        });
+        onAuthenticated(bmwClient);
       }
     });
   });
