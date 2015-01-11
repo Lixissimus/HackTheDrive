@@ -27,7 +27,7 @@ var chargepoints = [];
 // }
 
 // create some dummy data
-initHighscoreData();
+// initHighscoreData();
 
 openDatabaseConnection(startSocketServer);
 
@@ -243,12 +243,23 @@ function getUserByName(username) {
 
 function registerUser(username, chargepoint) {
 	// TODO!!!
-	if (!getChargepointByName(chargepoint)) {
-		registerChargepoint(chargepoint, function() {
+
+	chargepointsCollection.findOne({name: chargepoint}, function(err, item) {
+		if (!item) {
+			registerChargepoint(chargepoint, function() {
+				registerUser(username, chargepoint);
+			});
 			registerUser(username, chargepoint);
-		});
-		return;
-	}
+			return;
+		}
+	});
+
+	// if (!getChargepointByName(chargepoint)) {
+	// 	registerChargepoint(chargepoint, function() {
+	// 		registerUser(username, chargepoint);
+	// 	});
+	// 	return;
+	// }
 
 	usersCollection.findOne({username: username}, function(err, item) {
 		if (item) {
