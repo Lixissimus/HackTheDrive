@@ -6,97 +6,56 @@ function GameController(bmwClient) {
 	this.accelerationPedal = 0;
 
 	var _this = this;
+	var maxSteeringAngle = 365;
+	var pollTime = 100;
+
 	function pollData() {
 		bmwClient.get(bmwClient.model('Vehicle'), {}, function(error, result) {
+			if (error) {
+				console.log('Error retrieving vehicle information');
+				return;
+			}
+
     	// just get the first car
 			var carData = result.Data[0];
 			var evtId = carData.LastTripEvent;
+
+			// invalid event, no need to get Event data
+			if (evtId === '00000000-0000-0000-0000-000000000000') return;
+			
 			bmwClient.get(bmwClient.model('Event'), {id: evtId}, function(error, result) {
-				debugger;
-				var angle = result.SteeringWheelAngle;
-				if (angle !== undefined && angle !== null) {
-					_this.steeringAngle = angle;
+				if (error) {
+					console.log('Error retrieving event information');
+					return;
 				}
 
+				// just trip status events contain the required information
+				if (result.EventType !== 'TripStatus') return;
+
+				// SteeringWheelAngle
+				var angle = result.SteeringWheelAngle;
+				if (angle !== undefined && angle !== null) {
+					// normalize to [-100;100]
+					var normalized = (angle / maxSteeringAngle) * 100;
+					// clip at 100
+					if (normalized > 100) normalized = 100;
+					if (normalized < -100) normalized = -100;
+					// flip sign to make positiv numbers indicate right steering
+					normalized = -normalized;
+
+					_this.steeringAngle = normalized;
+				}
+
+				// AcceleratorPedal
 				var pedal = result.AcceleratorPedal;
 				if (pedal !== undefined && pedal !== null) {
 					_this.accelerationPedal = pedal;
 				}
+
+				console.log('steering wheel: %d, accelerator pedal: %d', _this.steeringAngle, _this.accelerationPedal);
 			});
 		});
 	}
 
-	setInterval(pollData, 100);
+	setInterval(pollData, pollTime);
 }
-
-
-
-//     $.each(result.Data, function(key, value) {
-//       console.log(value.LastAcceleratorPedal);
-//       if ((value.LastLocation != null) && (value.LastLocation.Lat != null) && (value.LastLocation.Lng != null)) {
-//         lat[i] = value.LastLocation.Lat;
-//         lng[i] = value.LastLocation.Lng;
-//         return i++;
-//       }
-//     });
-//     div = $("#result");
-//     if (lat.length > 0) {
-//       div.html('The vehicle is at: ' + lat[0] + ", " + lng[0]);
-//       // return buildMap(lat[0], lng[0]);
-//     } else {
-//       return div.html("No vehicle detected!");
-//     }
-//   });
-// 	}
-
-
-// }
-
-
-//   getData = function () {
-//     bmw_client.get(bmw_client.model("Vehicle"), {}, function(error, result) {
-//       var i, lat, lng;
-//       lat = [];
-//       lng = [];
-//       i = 0;
-//       $.each(result.Data, function(key, value) {
-//         console.log(value.LastAcceleratorPedal);
-//         if ((value.LastLocation != null) && (value.LastLocation.Lat != null) && (value.LastLocation.Lng != null)) {
-//           lat[i] = value.LastLocation.Lat;
-//           lng[i] = value.LastLocation.Lng;
-//           return i++;
-//         }
-//       });
-//       div = $("#result");
-//       if (lat.length > 0) {
-//         div.html('The vehicle is at: ' + lat[0] + ", " + lng[0]);
-//         // return buildMap(lat[0], lng[0]);
-//       } else {
-//         return div.html("No vehicle detected!");
-//       }
-//     });
-//   }
-
-//   setInterval(getData, 100);
-
-//   buildMap = function(lat, lng) {
-//     var map;
-//     map = new GMaps({
-//       el: '#map',
-//       lat: lat,
-//       lng: lng,
-//       panControl: false,
-//       streetViewControl: false,
-//       mapTypeControl: false,
-//       overviewMapControl: false
-//     });
-//     return setTimeout(function() {
-//       return map.addMarker({
-//         lat: lat,
-//         lng: lng,
-//         animation: google.maps.Animation.DROP,
-//         draggable: false,
-//         title: 'Current Location'
-//       }, 1000);
-//     });
-//   };
