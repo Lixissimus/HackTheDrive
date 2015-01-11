@@ -1,12 +1,24 @@
 var username;
 
+var ZENDRIVE_MOCK_APP_KEY = "bqUu9FJxbii5AZFBnTVj0MQLzuqZSwjj";
+var ZENDRIVE_APP_KEY = "";
+var ZENDRIVE_DRIVER_MAP = {
+	"lixissimus" : "Drogo(Dangerous)",
+	"frable" : "Grant(Great)",
+	"sfinterns" : "Jenna(Fair)"
+}
+
 function onAuthenticated(bmwClient, name) {
 	username = name;
+	localStorage.setItem("username", username);
 	bmwClient.get(bmwClient.model('Vehicle'), {}, function(error, result) {
 		if (error) {
 			console.log('Error retrieving vehicle information');
 			return;
 		}
+
+		// Zendrive SDK setup
+		//cordova.exec(callback, function(err){alert(err)}, "Zendrive", "setup", [ ZENDRIVE_APP_KEY, ZENDRIVE_DRIVER_MAP[name] ]);
 
 		var Vehicles = bmwClient.getResults(bmwClient.model('Vehicle'), result);
 

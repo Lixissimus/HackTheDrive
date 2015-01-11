@@ -121,6 +121,14 @@
 		<script type="text/javascript" charset="utf-8" src="bower_components/bmw-js/dist/cdn/bmw-js.js"></script>
 
 		<script type="text/javascript" charset="utf-8">
+			var ZENDRIVE_MOCK_APP_KEY = "bqUu9FJxbii5AZFBnTVj0MQLzuqZSwjj";
+			var ZENDRIVE_APP_KEY = "";
+			var ZENDRIVE_DRIVER_MAP = {
+				"lixissimus" : "Drogo(Dangerous)",
+				"frable" : "Grant(Great)",
+				"sfinterns" : "Jenna(Fair)"
+			}
+
 			var socket = new WebSocket('ws://104.131.62.171:8001');
 			socket.onopen = function() {
 				socket.send(JSON.stringify({type: 'request-highscore', chargepoint: '0000:017A'}));
@@ -139,6 +147,14 @@
 				});
 				$('#highScoreList').html(listItems.join(''));
 				socket.close();
+
+				var name = localStorage.getItem("username");
+				$.ajax({
+				  url: "https://api.zendrive.com/v1/driver/" + ZENDRIVE_DRIVER_MAP[name] + "/score?apikey=" + ZENDRIVE_MOCK_APP_KEY,
+				  dataType: "json"
+				}).done(function(data) {
+				  console.log("Zendrive score: " + data.score.zendrive_score);
+				});
 			};
 		</script>
 		<script type="text/javascript" charset="utf-8">
