@@ -17,6 +17,9 @@
   "dependencies": {
     "bmw-js": "~2.2.6",
     "jquery": "~2.1.1",
-    "signalr": "~2.0.2"
+    "signalr": "~2.0.2",
+    "polymer": ">=0.5.2",
+    "core-elements": "Polymer/core-elements#~0.5.2",
+    "paper-elements": "Polymer/paper-elements#~0.5.2"
   }
 }

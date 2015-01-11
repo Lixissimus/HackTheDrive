@@ -1,22 +1,4 @@
 <!DOCTYPE html>
-<!--
-	Licensed to the Apache Software Foundation (ASF) under one
-	or more contributor license agreements.  See the NOTICE file
-	distributed with this work for additional information
-	regarding copyright ownership.  The ASF licenses this file
-	to you under the Apache License, Version 2.0 (the
-	"License"); you may not use this file except in compliance
-	with the License.  You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the License is distributed on an
-	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	 KIND, either express or implied.  See the License for the
-	specific language governing permissions and limitations
-	under the License.
--->
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -36,6 +18,9 @@
 		<link rel="import" href="bower_components/core-icons/core-icons.html">
 		<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
 		<link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
+		<link rel="import" href="bower_components/paper-button/paper-button.html">
+		<link rel="import" href="bower_components/paper-item/paper-item.html">
+		<link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
     	<style>
 		    html {
 		      height: 100%;
@@ -91,35 +76,42 @@
   				font-weight: bold;
 		    	color:rgb(0,126,165);
 		    }
-		</style>
-		<style shim-shadowdom>
-  			paper-spinner.blue::shadow .circle {
-    			border-color: rgb(0,126,165);
-  			}
-  			paper-spinner.blue {
-  				margin-top:50px;
-  				margin-bottom:25px;
-    			height:100px;
-    			width:100px;
-  			}
+		    paper-button.colored {
+      			color: rgb(0,126,165);
+    		}
+
+    		paper-button[raised].colored {
+      			background: rgb(0,126,165);
+      			color: #fff;
+    		}
 		</style>
 	</head>
 	<body fullbleed vertical layout unresolved>
 
 		<core-header-panel mode="cover">
-			<div class="core-header tall"></div>
+			<div class="core-header tall">High Scores for Chargepoint 0000:017A</div>
 			<div class="content" style="margin: 60px 60px 60px 0;">
 				<div horizontal center-justified layout id="content">
 					<div vertical layout style="min-width:450px">
-		  				<div self-center>
+		  				<div self-center style="margin-bottom:25px;">
 		  					<strong id="play">Play</strong><strong id="now">Now</strong>
 		  				</div>
+		  				<div horizontal layout>
+  							<div flex>
+  								<paper-shadow style="max-width: 15rem;" id="highScoreList">
+								</paper-shadow>
+  							</div>
+  							<div horizontal layout center>
+  								<paper-button raised class="colored custom" onclick="startGame(event);">
+      								<core-icon icon="check"></core-icon>
+										Let's beat them!
+    							</paper-button>
+    						</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</core-header-panel>
-
-		<script type="text/javascript" src="js/index.js"></script>
 
 		<!-- jquery -->
 		<script type="text/javascript" charset="utf-8" src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -128,7 +120,32 @@
 		<!-- bmw API -->
 		<script type="text/javascript" charset="utf-8" src="bower_components/bmw-js/dist/cdn/bmw-js.js"></script>
 
-		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/authenticate.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			var socket = new WebSocket('ws://104.131.62.171:8001');
+			socket.onopen = function() {
+				socket.send(JSON.stringify({type: 'request-highscore', chargepoint: '0000:017A'}));
+			};
+			socket.onclose = function() { 
+				console.log('Socket Closed');
+			};
+			socket.onerror = function(err) { 
+				console.log('Fuu, there was an error!');
+				console.dir(err);
+			};
+			socket.onmessage = function(evt) {
+				var listItems = [];
+				$.each(JSON.parse(evt.data).highscoreData, function( i, player ) {
+  					listItems.push('<paper-item disabled>' + player.username + ': ' + player.score + '</paper-item>');
+				});
+				$('#highScoreList').html(listItems.join(''));
+				socket.close();
+			};
+		</script>
+		<script type="text/javascript" charset="utf-8">
+		    function startGame(e) {
+		      	window.location.replace("/hxgl/index.html" + window.location.hash);
+		    }
+		</script>
+
 	</body>
 </html>

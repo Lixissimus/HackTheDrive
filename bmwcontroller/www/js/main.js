@@ -14,6 +14,15 @@ function onAuthenticated(bmwClient, name) {
 		var vehicle = Vehicles[0];
 		var observer;
 
+
+		$( "#content" ).html( '' + 
+			'<div vertical layout style="min-width:450px">' +
+  				'<div self-center><strong id="play">Play</strong><strong id="now">Now</strong></div>' +
+  				'<div self-center><paper-spinner active class="blue"></paper-spinner></div>' +
+  				'<div self-center><strong id="charger">Waiting for Charger</strong></div>' +
+			'</div>');
+
+
 		bmwClient.observe(vehicle, null, function(entity) {
 			if (entity.ChargingStatus === 'Charging') {
 				console.log('Detected charging');
@@ -52,7 +61,8 @@ function onChargingDetected() {
 	};
 	socket.onclose = function() {
 		console.log('Socket closed');
-		window.location.replace("/hxgl/index.html" + window.location.hash);
+		//window.location.replace("/hxgl/index.html" + window.location.hash);
+		window.location.replace("/scores.html" + window.location.hash);
 	};
 	socket.onerror = function(err) { console.log('Error in register-user socket'); };
 }
