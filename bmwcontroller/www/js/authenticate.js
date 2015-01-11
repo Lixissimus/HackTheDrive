@@ -5,7 +5,7 @@
 
   config = {
     application: '9a2bad4b-b159-40da-b880-d59ed4154b76',
-    redirect_uri: 'http://localhost:8000/index.html',
+    redirect_uri: document.URL,
     hostname: 'data.api.hackthedrive.com',
     version: 'v1',
     port: '443',
