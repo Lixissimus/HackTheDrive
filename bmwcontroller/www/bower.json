@@ -1,0 +1,22 @@
+{
+  "name": "PlayNow",
+  "version": "1.0.0",
+  "homepage": "https://github.com/Lixissimus/HackTheDrive",
+  "authors": [
+    "Lixissimus <felix.wolff@student.hpi.de>"
+  ],
+  "description": "HackTheDrive hackathon project",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bmw-js": "~2.2.6",
+    "jquery": "~2.1.1",
+    "signalr": "~2.0.2"
+  }
+}
