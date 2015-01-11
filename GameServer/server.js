@@ -10,6 +10,7 @@ var port = 8001;
 
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({port: port});
+var database, usersCollection, chargepointsCollection;
 
 console.log('Server runnung on port %d...', port);
 
@@ -26,83 +27,146 @@ var chargepoints = [];
 // }
 
 // create some dummy data
-initHighscoreData();
+// initHighscoreData();
 
-wss.on('connection', function(ws) {	
-	ws.on('close', function() {
-		console.log('Socket closed');
-	});
- 
-	ws.on('error', function(err) {
-		console.log('Socket error - %s', err);
-	});
+openDatabaseConnection(startSocketServer);
 
-	ws.on('message', function(message) {
-		message = JSON.parse(message);
-		if (!message.type) {
-			var response = JSON.stringify({
-				type: 'error',
-				message: 'No type field set in message'
-			});
-			ws.send(response);
+
+function openDatabaseConnection(then) {
+	var MongoClient = require('mongodb').MongoClient;
+
+	// Connect to the db
+	MongoClient.connect("mongodb://localhost:27017/PlayNowHighscores", function(err, db) {
+		if (err) {
+			console.log(err);
+			return;
 		}
 
-		switch (message.type) {
-			case 'register-user':
-				var username = message.username;
-				var chargepoint = message.chargepoint;
+		console.log('Connected to Database');
+		database = db;
 
-				registerUser(username, chargepoint);
-				break;
-			case 'post-score':
-				var username = message.username;
-				var score = message.score;
+		database.collection('users', function(err, collection) {
+			usersCollection = collection;
+			console.log('Retrieved users collection');
+			database.collection('chargepoints', function(err, collection) {
+				chargepointsCollection = collection;
+				console.log('Retrieved chargepoints collection');
 
-				postScore(username, score);
-				break;
-			case 'request-highscore':
-				var chargepoint = message.chargepoint
+				then();
+			});
+		});
+	});
+}
 
-				var highscoreData = requestHighscore(chargepoint);
 
-				var response = JSON.stringify({
-					type: 'response-highscore',
-					highscoreData: highscoreData
-				});
+function startSocketServer() {
+	wss.on('connection', function(ws) {	
+		ws.on('close', function() {
+			console.log('Socket closed');
+		});
+	 
+		ws.on('error', function(err) {
+			console.log('Socket error - %s', err);
+		});
 
-				ws.send(response);
-				break;
-			default:
+		ws.on('message', function(message) {
+			message = JSON.parse(message);
+			if (!message.type) {
 				var response = JSON.stringify({
 					type: 'error',
-					message: 'Unknown message type'
+					message: 'No type field set in message'
 				});
 				ws.send(response);
-		}
+			}
+
+			switch (message.type) {
+				case 'register-user':
+					var username = message.username;
+					var chargepoint = message.chargepoint;
+
+					registerUser(username, chargepoint);
+					break;
+				case 'post-score':
+					var username = message.username;
+					var score = message.score;
+
+					postScore(username, score);
+					break;
+				case 'request-highscore':
+					var chargepoint = message.chargepoint
+
+					requestHighscore(chargepoint, function(highscoreData) {
+						var response = JSON.stringify({
+							type: 'response-highscore',
+							highscoreData: highscoreData
+						});
+
+						ws.send(response);
+					});
+					break;
+				default:
+					var response = JSON.stringify({
+						type: 'error',
+						message: 'Unknown message type'
+					});
+					ws.send(response);
+			}
+		});
 	});
-});
+}
 
 
 // --- Highscore handline ---
 
-function requestHighscore(chargepointName) {
-	var chargepoint = getChargepointByName(chargepointName);
+function requestHighscore(chargepointName, callback) {
+	chargepointsCollection.findOne({name: chargepointName}, function(err, chargepoint) {
+		if (!chargepoint) {
+			callback([]);
+		} else {
+			callback(chargepoint.highscore.slice(0, 5));
+		}
+	});
 
-	if (!chargepoint) return [];
 
-	return chargepoint.highscore.slice(0, 5);
+	// // TODO
+	// var chargepoint = getChargepointByName(chargepointName);
+
+	// if (!chargepoint) return [];
+
+	// return chargepoint.highscore.slice(0, 5);
 }
 
 function postScore(username, score) {
-	var user = getUserByName(username);
-	var chargepoint = getChargepointByName(user.chargepoint);
+	usersCollection.findOne({username: username}, function(err, user) {
+		chargepointsCollection.findOne({name: user.chargepoint}, function(err, chargepoint) {
+			var scoreRecord = {
+				username: username,
+				score: score
+			}
 
-	var scoreRecord = {
-		username: username,
-		score: score
-	}
+			insertSorted(chargepoint.highscore, scoreRecord);
 
-	insertSorted(chargepoint.highscore, scoreRecord);
+			chargepointsCollection.update({name: chargepoint.name}, {$set:{highscore: chargepoint.highscore}}, {w:1}, function(err, result) {
+				if (err) {
+					console.log(err);
+					return;
+				}
+
+				console.log('updated highscore of %s', chargepoint.name);
+			});
+		});
+	});
+
+
+	// var user = getUserByName(username);
+	// var chargepoint = getChargepointByName(user.chargepoint);
+
+	// var scoreRecord = {
+	// 	username: username,
+	// 	score: score
+	// }
+
+	// insertSorted(chargepoint.highscore, scoreRecord);
 }
 
 function insertSorted(array, record) {
@@ -114,23 +178,48 @@ function insertSorted(array, record) {
 
 // --- Chargepoint handling ---
 
-function registerChargepoint(chargepointName) {
-	// chargepoint is already registered
-	if (getChargepointByName(chargepointName)) {
-		console.log('Chargepoint %s already registered', chargepointName);
-		return;
-	}
+function registerChargepoint(chargepointName, callback) {
+	chargepointsCollection.findOne({name: chargepointName}, function(err, item) {
+		if (item) {
+			// chargepoint already exists
+			console.log('chargepoint %s already exists', chargepointName);
+			return;
+		}
 
-	var newChargepoint = {
-		name: chargepointName,
-		highscore: []
-	}
+		var newChargepoint = {
+			name: chargepointName,
+			highscore: []
+		}
 
-	chargepoints.push(newChargepoint);
+		chargepointsCollection.insert(newChargepoint, {w:1}, function(err, result) {
+			if (err) {
+				callback(err);
+				return;
+			}
 
-	console.log('Registered new chargepoint %s', chargepointName);
+			console.log('chargepoint %s inserted', chargepointName);
+			callback(null, chargepointName);
+		});
+	});
 
-	return newChargepoint;
+
+
+	// // chargepoint is already registered
+	// if (getChargepointByName(chargepointName)) {
+	// 	console.log('Chargepoint %s already registered', chargepointName);
+	// 	return;
+	// }
+
+	// var newChargepoint = {
+	// 	name: chargepointName,
+	// 	highscore: []
+	// }
+
+	// chargepoints.push(newChargepoint);
+
+	// console.log('Registered new chargepoint %s', chargepointName);
+
+	// return newChargepoint;
 }
 
 function getChargepointByName(chargepointName) {
@@ -153,38 +242,79 @@ function getUserByName(username) {
 }
 
 function registerUser(username, chargepoint) {
-	if (!getChargepointByName(chargepoint)) {
-		registerChargepoint(chargepoint);
-	}
+	// TODO!!!
 
-	// user is already registered
-	var user = getUserByName(username);
-	if (user) {
-		console.log('Setting current chargepoint of %s to %s', username, chargepoint);
-		user.chargepoint = chargepoint;
-		return;
-	}
+	chargepointsCollection.findOne({name: chargepoint}, function(err, item) {
+		if (!item) {
+			registerChargepoint(chargepoint, function() {
+				registerUser(username, chargepoint);
+			});
+			registerUser(username, chargepoint);
+			return;
+		}
+	});
 
-	var newUser = {
-		username: username,
-		chargepoint: chargepoint
-	}
+	// if (!getChargepointByName(chargepoint)) {
+	// 	registerChargepoint(chargepoint, function() {
+	// 		registerUser(username, chargepoint);
+	// 	});
+	// 	return;
+	// }
 
-	users.push(newUser);
+	usersCollection.findOne({username: username}, function(err, item) {
+		if (item) {
+			// user already exists, update chargepoint
+			usersCollection.update({username: username}, {$set:{chargepoint: chargepoint}}, {w:1}, function(err, result) {
+				if (err) {
+					console.log(err);
+					return;
+				}
 
-	console.log('Registered %s at chargepoint %s', username, chargepoint);
+				console.log('%s updated to chargepoint %s', username, chargepoint);
+			});
+		} else {
+			var newUser = {
+				username: username,
+				chargepoint: chargepoint
+			}
+			usersCollection.insert(newUser, {w:1}, function(err, result) {
+				if (err) {
+					console.log(err);
+					return;
+				}
+
+				console.log('%s inserted with chargepoint %s', username, chargepoint);
+			});
+		}
+	});
+
+	// // user is already registered
+	// var user = getUserByName(username);
+	// if (user) {
+	// 	console.log('Setting current chargepoint of %s to %s', username, chargepoint);
+	// 	user.chargepoint = chargepoint;
+	// 	return;
+	// }
+
+	// var newUser = {
+	// 	username: username,
+	// 	chargepoint: chargepoint
+	// }
+
+	// users.push(newUser);
+
+	// console.log('Registered %s at chargepoint %s', username, chargepoint);
 }
 
 
 // --- create dummy data ---
 
-function initHighscoreData() {
-	var chargepoint = registerChargepoint('0000:017A');
-	chargepoint.highscore = [{
-		username: 'Morton',
-		score: 9005
-	}, {
-		username: 'Bowser',
-		score: 7365
-	}];
-}
+// function initHighscoreData() {
+// 	chargepoint.highscore = [{
+// 		username: 'Morton',
+// 		score: 9005
+// 	}, {
+// 		username: 'Bowser',
+// 		score: 7365
+// 	}];
+// }
