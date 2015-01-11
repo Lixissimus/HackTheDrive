@@ -17,7 +17,6 @@
   App = bmwClient.model('App');
 
   $(function() {
-    var div;
     bmwClient.token(function(error, result) {
       if (error) {
         console.log("redirecting to login.");
