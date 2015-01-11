@@ -1,0 +1,3 @@
+[submodule "bmwcontroller/www/hxgl"]
+	path = bmwcontroller/www/hxgl
+	url = https://FraBle@github.com/FraBle/HexGL.git

@@ -34,5 +34,5 @@ function onAuthenticated(bmwClient) {
 }
 
 function onChargingDetected() {
-	alert('Charging');
+	window.location.replace("/hxgl/index.html" + window.location.hash);
 }
