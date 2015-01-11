@@ -1,20 +1,6 @@
-# HackTheDrive
-Repo for the Hack the Drive hackathon
+# PlayNow - HackTheDrive
 
-setup
-=====
+PlayNow is the most fun way possible to pass the wait time during charging. The very own car with its steering wheel and accelerator pedal serves as a controller for the challenging Open Source game HexGL in which i3 owners compete with each other to reach the highest scores at hundreds of ChargePoints. Excellent driving behaviour measured by Zendrive can give an extra boost to increase the chance to reach top positions. All this is combined in a multi-platform app generated with PhoneGap.
+This prototype shows the variety of possibilities to use the i3 as a controller for virtual reality scenarios. It barely scratches the surface of what will be possible with future car API extensions such as virtual driving lessons as well as safe driving trainings.
 
-- clone the repo
-- run 'git submodule init'
-- run 'git submodule update'
-
-- if you do not use heroku:
-	- cd into bmwcontroller/www/
-	- run 'bower install'
-	- start a static http-server, e.g. 'python -m SimpleHTTPServer'
-	- visit localhost:8000/index.html
-
-- if you want to start the highscore server:
-	- cd into GameServer/
-	- run 'npm install'
-	- run 'npm start'
+Our prototype combines the information of the BMW Car Data API and Zendrive API with a mobile gaming app to connect reality with virtuality. The score data is stored in a MongoDB instance connected to a node.js WebSocket server on a DigitalOcean droplet. The Open Source game HexGL and Polymer frontend is encapsulated in a PhoneGap created mobile app powered by a Heroku instance. 
