@@ -90,7 +90,7 @@ function requestHighscore(chargepointName) {
 
 	if (!chargepoint) return [];
 
-	return chargepoint.highscore;
+	return chargepoint.highscore.slice(0, 5);
 }
 
 function postScore(username, score) {
