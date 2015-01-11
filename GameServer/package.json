@@ -1,0 +1,14 @@
+{
+  "name": "GameServer",
+  "version": "1.0.0",
+  "description": "Websocket server for highscores and multiplayer features",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Lixissimus",
+  "dependencies": {
+    "mongodb": "^1.4.28",
+    "ws": "^0.6.5"
+  }
+}
