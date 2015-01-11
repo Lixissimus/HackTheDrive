@@ -153,8 +153,10 @@ function registerUser(username, chargepoint) {
 	}
 
 	// user is already registered
-	if (getUserByName(username)) {
-		console.log('User %d already registered', username);
+	var user = getUserByName(username);
+	if (user) {
+		console.log('Setting current chargepoint of %s to %s', username, chargepoint);
+		user.chargepoint = chargepoint;
 		return;
 	}
 
@@ -165,5 +167,5 @@ function registerUser(username, chargepoint) {
 
 	users.push(newUser);
 
-	console.log('Registered %s at chargepoint %', username, chargepoint);
+	console.log('Registered %s at chargepoint %s', username, chargepoint);
 }
