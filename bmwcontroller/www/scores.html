@@ -217,10 +217,15 @@
 			};
 			socket.onmessage = function(evt) {
 				var listItems = [];
-				$.each(JSON.parse(evt.data).highscoreData, function( i, player ) {
-  					listItems.push('<paper-item disabled>' + player.username + ': ' + player.score + '</paper-item>');
-				});
-				$('#highScoreList').html(listItems.join(''));
+
+				// fight timing issues
+				setTimeout(function() {
+					$.each(JSON.parse(evt.data).highscoreData, function( i, player ) {
+	  					listItems.push('<paper-item disabled>' + player.username + ': ' + player.score + '</paper-item>');
+					});
+					$('#highScoreList').html(listItems.join(''));
+				}, 0);
+				
 				socket.close();
 
 				var name = localStorage.getItem("username");
