@@ -1,7 +1,7 @@
 var username;
 
 var ZENDRIVE_MOCK_APP_KEY = "bqUu9FJxbii5AZFBnTVj0MQLzuqZSwjj";
-var ZENDRIVE_APP_KEY = "";
+var ZENDRIVE_APP_KEY = "k3vJh9Ft6cYGRW4jH8KtmngGfnaSQL7K";
 var ZENDRIVE_DRIVER_MAP = {
 	"lixissimus" : "Drogo(Dangerous)",
 	"frable" : "Grant(Great)",
@@ -18,7 +18,7 @@ function onAuthenticated(bmwClient, name) {
 		}
 
 		// Zendrive SDK setup
-		//cordova.exec(callback, function(err){alert(err)}, "Zendrive", "setup", [ ZENDRIVE_APP_KEY, ZENDRIVE_DRIVER_MAP[name] ]);
+		cordova.exec(function(res){console.log(res)}, function(err){console.error(err)}, "Zendrive", "setup", [ ZENDRIVE_APP_KEY, ZENDRIVE_DRIVER_MAP[name] ]);
 
 		var Vehicles = bmwClient.getResults(bmwClient.model('Vehicle'), result);
 
