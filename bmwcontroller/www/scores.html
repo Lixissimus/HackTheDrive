@@ -92,6 +92,32 @@
 		    core-header-panel[mode=cover]::shadow #mainContainer {
 			  left: 0;
 			}
+
+		    .dialog {
+		      margin-top: 20px;
+		      margin-bottom: 20px;
+		      position: relative;
+		      display: inline-block;
+		      width: 185px;
+		      height: 100px;
+		      vertical-align: top;
+		      background-color: #fff;
+		      box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+		      box-sizing: border-box;
+		      padding: 16px;
+		    }
+		    
+		    .dialog > .zendrive {
+		      height: 170px;
+		      font-size: 0.75rem;
+		    }
+		    
+		    .dialog > .zendrive > .title {
+			  font-size: 1.0rem;
+			  font-weight: 500;
+			  margin-bottom: 5px;
+		    }
+
 		    @media all and (max-width: 768px) {
 			    strong {
 			    	font-size: 2rem;
@@ -101,6 +127,7 @@
 			    }
 			    .content {
 	  			  margin: 40px 20px 20px 20px;
+  			  	  padding-top: 2rem;
 			    }
 			    #content-container {
 			    	min-width:0;
@@ -114,10 +141,19 @@
 				}
 			}
 		</style>
+		<style shim-shadowdom>
+  			paper-spinner.blue::shadow .circle {
+    			border-color: rgb(0,126,165);
+  			}
+  			paper-spinner.blue {
+  				margin-top:10px;
+  				margin-left:60px;
+  			}
+		</style>
 	</head>
 	<body fullbleed vertical layout unresolved>
 		<core-header-panel mode="cover">
-			<div class="core-header tall">High Scores for Chargepoint 0000:017A</div>
+			<div class="core-header tall">High Scores for ChargePoint 0000:017A</div>
 			<div class="content">
 				<div horizontal center-justified layout id="content">
 					<div vertical layout id="content-container">
@@ -128,14 +164,22 @@
 						<core-media-query query="max-width: 768px" queryMatches="{{phoneScreen}}"></core-media-query>
 		  				<div layout vertical?="{{phoneScreen}}" horizontal?="{{!phoneScreen}}">
   							<div flex?="{{!phoneScreen}}">
-  								<paper-shadow style="max-width: 15rem;" id="highScoreList">
+  								<paper-shadow style="max-width: 15rem;background: #263238;" id="highScoreList">
 								</paper-shadow>
   							</div>
-  							<div horizontal layout center>
-  								<paper-button raised class="colored custom" onclick="startGame(event);">
-      								<core-icon icon="check"></core-icon>
-										Let's beat them!
-    							</paper-button>
+  							<div vertical layout center>
+  								<div>
+	  								<paper-button raised class="colored custom" onclick="startGame(event);">
+	      								<core-icon icon="check"></core-icon>
+											Let's beat them!
+	    							</paper-button>
+								</div>
+								<div class="dialog">
+							    	<div class="zendrive">
+							        	<div class="title">Your Zendrive Bonus</div>
+							        	<div id="zendriveScore"><paper-spinner active class="blue"></paper-spinner></div>
+							      	</div>
+							    </div>
     						</div>
 						</div>
 						</template>
@@ -184,7 +228,10 @@
 				  url: "https://api.zendrive.com/v1/driver/" + ZENDRIVE_DRIVER_MAP[name] + "/score?apikey=" + ZENDRIVE_MOCK_APP_KEY,
 				  dataType: "json"
 				}).done(function(data) {
-				  console.log("Zendrive score: " + data.score.zendrive_score);
+				  	console.log("Zendrive score: " + data.score.zendrive_score);
+					var zendriveScore = data.score.zendrive_score * 10;
+					$('#zendriveScore').html('Congrats, your Zendrive Score gives you <b>' + zendriveScore + '</b> extra points!');
+					localStorage.setItem("zendrive", zendriveScore);
 				});
 			};
 		</script>

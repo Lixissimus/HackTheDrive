@@ -26,9 +26,6 @@ var chargepoints = [];
 // 	highscore: array of { username: ..., score:... }
 // }
 
-// create some dummy data
-// initHighscoreData();
-
 openDatabaseConnection(startSocketServer);
 
 
@@ -119,6 +116,7 @@ function startSocketServer() {
 // --- Highscore handline ---
 
 function requestHighscore(chargepointName, callback) {
+	console.log('highscore requested for %s', chargepointName);
 	chargepointsCollection.findOne({name: chargepointName}, function(err, chargepoint) {
 		if (!chargepoint) {
 			callback([]);
@@ -126,14 +124,6 @@ function requestHighscore(chargepointName, callback) {
 			callback(chargepoint.highscore.slice(0, 5));
 		}
 	});
-
-
-	// // TODO
-	// var chargepoint = getChargepointByName(chargepointName);
-
-	// if (!chargepoint) return [];
-
-	// return chargepoint.highscore.slice(0, 5);
 }
 
 function postScore(username, score) {
@@ -156,17 +146,6 @@ function postScore(username, score) {
 			});
 		});
 	});
-
-
-	// var user = getUserByName(username);
-	// var chargepoint = getChargepointByName(user.chargepoint);
-
-	// var scoreRecord = {
-	// 	username: username,
-	// 	score: score
-	// }
-
-	// insertSorted(chargepoint.highscore, scoreRecord);
 }
 
 function insertSorted(array, record) {
@@ -201,25 +180,6 @@ function registerChargepoint(chargepointName, callback) {
 			callback(null, chargepointName);
 		});
 	});
-
-
-
-	// // chargepoint is already registered
-	// if (getChargepointByName(chargepointName)) {
-	// 	console.log('Chargepoint %s already registered', chargepointName);
-	// 	return;
-	// }
-
-	// var newChargepoint = {
-	// 	name: chargepointName,
-	// 	highscore: []
-	// }
-
-	// chargepoints.push(newChargepoint);
-
-	// console.log('Registered new chargepoint %s', chargepointName);
-
-	// return newChargepoint;
 }
 
 function getChargepointByName(chargepointName) {
@@ -242,24 +202,14 @@ function getUserByName(username) {
 }
 
 function registerUser(username, chargepoint) {
-	// TODO!!!
-
 	chargepointsCollection.findOne({name: chargepoint}, function(err, item) {
 		if (!item) {
 			registerChargepoint(chargepoint, function() {
 				registerUser(username, chargepoint);
 			});
-			registerUser(username, chargepoint);
 			return;
 		}
 	});
-
-	// if (!getChargepointByName(chargepoint)) {
-	// 	registerChargepoint(chargepoint, function() {
-	// 		registerUser(username, chargepoint);
-	// 	});
-	// 	return;
-	// }
 
 	usersCollection.findOne({username: username}, function(err, item) {
 		if (item) {
@@ -287,34 +237,4 @@ function registerUser(username, chargepoint) {
 			});
 		}
 	});
-
-	// // user is already registered
-	// var user = getUserByName(username);
-	// if (user) {
-	// 	console.log('Setting current chargepoint of %s to %s', username, chargepoint);
-	// 	user.chargepoint = chargepoint;
-	// 	return;
-	// }
-
-	// var newUser = {
-	// 	username: username,
-	// 	chargepoint: chargepoint
-	// }
-
-	// users.push(newUser);
-
-	// console.log('Registered %s at chargepoint %s', username, chargepoint);
 }
-
-
-// --- create dummy data ---
-
-// function initHighscoreData() {
-// 	chargepoint.highscore = [{
-// 		username: 'Morton',
-// 		score: 9005
-// 	}, {
-// 		username: 'Bowser',
-// 		score: 7365
-// 	}];
-// }
