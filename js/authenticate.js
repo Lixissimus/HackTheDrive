@@ -1,5 +1,5 @@
 (function() {
-  var App, BMWClient, buildMap, config, bmw_client;
+  var App, BMWClient, buildMap, config, bmwClient;
 
   BMWClient = this.BMWClient;
 
@@ -12,22 +12,22 @@
     scheme: 'https'
   };
 
-  bmw_client = new BMWClient(config);
+  bmwClient = new BMWClient(config);
 
-  App = bmw_client.model('App');
+  App = bmwClient.model('App');
 
   $(function() {
     var div;
-    bmw_client.token(function(error, result) {
+    bmwClient.token(function(error, result) {
       if (error) {
         console.log("redirecting to login.");
-        return bmw_client.authorize(config.redirect_uri);
+        return bmwClient.authorize(config.redirect_uri);
       } else {
-        bmw_client.get(bmw_client.model("User"), {
+        bmwClient.get(bmwClient.model("User"), {
           id: result.UserId
         }, function(error, result) {
           var message;
-          message = 'Successfully authorizeed ';
+          message = 'Successfully authenticated ';
           if (result.FirstName) {
             message += result.FirstName;
           } else if (result.UserName) {
@@ -39,62 +39,9 @@
           } else {
             message += "Unknown";
           }
-          alert(message);
+          onAuthenticated(bmwClient);
         });
       }
     });
-    return $("#button").click(function() {
-      return bmw_client.unauthorize(config.redirect_uri);
-    });
   });
 }).call(this);
-
-//   getData = function () {
-//     bmw_client.get(bmw_client.model("Vehicle"), {}, function(error, result) {
-//       var i, lat, lng;
-//       lat = [];
-//       lng = [];
-//       i = 0;
-//       $.each(result.Data, function(key, value) {
-//         console.log(value.LastAcceleratorPedal);
-//         if ((value.LastLocation != null) && (value.LastLocation.Lat != null) && (value.LastLocation.Lng != null)) {
-//           lat[i] = value.LastLocation.Lat;
-//           lng[i] = value.LastLocation.Lng;
-//           return i++;
-//         }
-//       });
-//       div = $("#result");
-//       if (lat.length > 0) {
-//         div.html('The vehicle is at: ' + lat[0] + ", " + lng[0]);
-//         // return buildMap(lat[0], lng[0]);
-//       } else {
-//         return div.html("No vehicle detected!");
-//       }
-//     });
-//   }
-
-//   setInterval(getData, 100);
-
-//   buildMap = function(lat, lng) {
-//     var map;
-//     map = new GMaps({
-//       el: '#map',
-//       lat: lat,
-//       lng: lng,
-//       panControl: false,
-//       streetViewControl: false,
-//       mapTypeControl: false,
-//       overviewMapControl: false
-//     });
-//     return setTimeout(function() {
-//       return map.addMarker({
-//         lat: lat,
-//         lng: lng,
-//         animation: google.maps.Animation.DROP,
-//         draggable: false,
-//         title: 'Current Location'
-//       }, 1000);
-//     });
-//   };
-
-// }).call(this);
