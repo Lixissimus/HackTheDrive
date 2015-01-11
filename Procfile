@@ -1,1 +1,1 @@
-web: python -m SimpleHTTPServer
+web: npm start
