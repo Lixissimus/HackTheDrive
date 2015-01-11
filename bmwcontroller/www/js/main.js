@@ -17,8 +17,11 @@ function onAuthenticated(bmwClient, name) {
 			return;
 		}
 
-		// Zendrive SDK setup
-		cordova.exec(function(res){console.log(res)}, function(err){console.error(err)}, "Zendrive", "setup", [ ZENDRIVE_APP_KEY, ZENDRIVE_DRIVER_MAP[name] ]);
+		var app = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
+		if ( app ) {
+		  // Zendrive SDK setup
+			cordova.exec(function(res){console.log(res)}, function(err){console.error(err)}, "Zendrive", "setup", [ ZENDRIVE_APP_KEY, ZENDRIVE_DRIVER_MAP[name] ]);
+		}
 
 		var Vehicles = bmwClient.getResults(bmwClient.model('Vehicle'), result);
 
