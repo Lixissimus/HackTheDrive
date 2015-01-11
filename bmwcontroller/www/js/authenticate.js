@@ -5,7 +5,7 @@
 
   config = {
     application: '9a2bad4b-b159-40da-b880-d59ed4154b76',
-    redirect_uri: document.URL,
+    redirect_uri: document.URL.indexOf('file:///') >= 0 ? 'http://bmwplaynow.herokuapp.com/index.html' : document.URL,
     hostname: 'data.api.hackthedrive.com',
     version: 'v1',
     port: '443',
