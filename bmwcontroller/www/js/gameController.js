@@ -16,7 +16,7 @@ function GameController(bmwClient) {
 				return;
 			}
 
-    	// just get the first car
+	    	// just get the first car
 			var carData = result.Data[0];
 			var evtId = carData.LastTripEvent;
 
